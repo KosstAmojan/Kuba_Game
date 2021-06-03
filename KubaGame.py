@@ -80,38 +80,8 @@ class KubaGame:
         if self._turn != playername:
             return False
 
-        # check if the move is valid -- ie there is a free space on the side opposite the direction being pushed OR the
-        # ball is on an edge that is opposite from the direction being pushed
-        # check edges first -- any coordinate having 0 or 6 in the x position or 0 or 6 in the y position is along an
-        # edge
-        if coordinates[0] not in (0, 6) and coordinates[1] not in (0, 6):
-            # Means there's an internal move that has been made
-
-            if direction == 'L':
-                # check if the cell immediately to the right is open.
-                open_coordinates = (coordinates[0]+1, coordinates[1])
-                if temp_board[open_coordinates] != 'X':
-                    return False
-
-            elif direction == 'R':
-                # check if the cell immediately to the left is open.
-                open_coordinates = (coordinates[0]-1, coordinates[1])
-                if temp_board[open_coordinates] != 'X':
-                    return False
-
-            elif direction == 'F':
-                # check if the cell immediately to the bottom is open.
-                open_coordinates = (coordinates[0], coordinates[1]-1)
-                if temp_board[open_coordinates] != 'X':
-                    return False
-
-            elif direction == 'B':
-                # check if the cell immediately to the top is open.
-                open_coordinates = (coordinates[0], coordinates[1]+1)
-                if temp_board[open_coordinates] != 'X':
-                    return False
-
-        # need to add a way to track if the attempted move attempts to undo the last move, since this is not allowed.
+        if self.isvalid(coordinates, direction) is False:
+            return False
 
         # execute the move
         if direction == 'L':
@@ -308,18 +278,54 @@ class KubaGame:
                 red += 1
         return (white, black, red)
 
+    def isvalid(self, coordinates, direction):
+        """
+        Checks if a particular move is valid, given coordinates and a direction.
+        :return: True if valid, False otherwise.
+        """
+        # check if the move is valid -- ie there is a free space on the side opposite the direction being pushed OR the
+        # ball is on an edge that is opposite from the direction being pushed
+        # check edges first -- any coordinate having 0 or 6 in the x position or 0 or 6 in the y position is along an
+        # edge
+        if coordinates[0] not in (0, 6) and coordinates[1] not in (0, 6):
+            # Means there's an internal move that has been made
+
+            if direction == 'L':
+                # check if the cell immediately to the right is open.
+                open_coordinates = (coordinates[0]+1, coordinates[1])
+                if self._gameBoard[open_coordinates] != 'X':
+                    return False
+
+            elif direction == 'R':
+                # check if the cell immediately to the left is open.
+                open_coordinates = (coordinates[0]-1, coordinates[1])
+                if self._gameBoard[open_coordinates] != 'X':
+                    return False
+
+            elif direction == 'F':
+                # check if the cell immediately to the bottom is open.
+                open_coordinates = (coordinates[0], coordinates[1]-1)
+                if self._gameBoard[open_coordinates] != 'X':
+                    return False
+
+            elif direction == 'B':
+                # check if the cell immediately to the top is open.
+                open_coordinates = (coordinates[0], coordinates[1]+1)
+                if self._gameBoard[open_coordinates] != 'X':
+                    return False
+
     def check_for_valid_moves(self, player):
         """
-        Will evaluate the board to see if the player object has any valid moves left.
+        Will evaluate the board to see if the supplied player object has any valid moves left.
         :return: True if there are valid moves, False otherwise.
         """
-        # check the border first for any marbles of the current player's color
-        searchcolor = player.get_color()
-
-
-        # then check all the interior marbles and all four of their adjacent spaces for marbles. If there are any open
-        # spaces, then we have a valid move.
-        pass
+        # loop through all keys and directions checking for valid moves. if a single valid move is found, return true.
+        for keys in self._gameBoard:
+            if self._gameBoard[keys] == player.get_color(): # checks for valid moves only for the specified player
+                for directions in ('L', 'R', 'F', 'B'):
+                    if self.isvalid(keys, directions):
+                        return True
+        return False
 
 
 class Player:

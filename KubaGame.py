@@ -218,13 +218,16 @@ class KubaGame:
         self._turn = opponent
         return True
 
-    def get_captured(self, player):
+    def get_captured(self, playername):
         """
         Gets the number of red marbles that have been captured and by which player. calls the player class method which
         counts the number of marbles that player object possesses.
         :return: the number of captured balls.
         """
-        captured = player.get_player_captured()
+        if playername == self._player1.get_name():
+            captured = self._player1.get_player_captured()
+        else:
+            captured = self._player2.get_player_captured()
         return captured
 
     def get_marble(self, coordinates):
@@ -401,3 +404,17 @@ class Player:
 #    d. If a win did not occur, catalogue the move that was completed, calculate the opposite move, store it in a data
 #       member, update the turn to the opposite player name.
 # 3. Wait for more input.
+
+
+game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
+val1 = game.get_marble_count() #returns (8,8,13)
+print(val1)
+val1ish = game.get_marble((0, 0))
+print(val1ish)
+val2 = game.get_captured('PlayerA') #returns 0
+print(val2)
+val3 = game.get_current_turn() #returns 'PlayerB' because PlayerA has just played.
+val4 = game.get_winner() #returns None
+game.make_move('PlayerA', (6,5), 'F')
+game.make_move('PlayerA', (6,5), 'L') #Cannot make this move
+game.get_marble((5,5)) #returns 'W'

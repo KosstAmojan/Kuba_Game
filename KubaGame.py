@@ -274,7 +274,7 @@ class KubaGame:
         :return: the color of the marble location at the coordinates specified.
         """
         marble = self._gameBoard[coordinates]
-        if marble != 'X':
+        if marble == 'X':
             return None
         else:
             return marble
@@ -412,7 +412,9 @@ class Player:
 
 game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
 val1 = game.get_marble_count() #returns (8,8,13)
+print(val1)
 val2 = game.get_captured('PlayerA') #returns 0
+print(val2)
 val3 = game.get_current_turn() #returns 'PlayerB' because PlayerA has just played.
 val4 = game.get_winner() #returns None
 game.make_move('PlayerA', (6,5), 'F')

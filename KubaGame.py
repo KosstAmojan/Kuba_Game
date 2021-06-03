@@ -46,12 +46,6 @@ class KubaGame:
         """
         return self._winner
 
-    def get_player_list(self):
-        """
-        Returns the list of players.
-        """
-        return self._players
-
     def get_opposite_player(self, player):
         """
         Given a player object, returns the opposite player.
@@ -62,11 +56,10 @@ class KubaGame:
         else:
             return self._player1
 
-
     def make_move(self, playername, coordinates, direction):
         """
-        Given a player name (object), coordinates upon which the marble is located, and direction to move the marble, will
-        see if the move is valid, make the move, and then determine whether the move resulted in a win.
+        Given a player name (object), coordinates upon which the marble is located, and direction to move the marble,
+        will see if the move is valid, make the move, and then determine whether the move resulted in a win.
         :param playername: the player making the move
         :param coordinates: the coordinates of the marble to be moved.
         :param direction: the direction of the move. Valid directions: L, R, F, B (Left, Right, Forward, Backward)
@@ -98,70 +91,74 @@ class KubaGame:
                     if temp == 'R':
                         playername.increase_captured()
 
+                temp_board[current_coordinates] = temp_board[adjacent_coordinates]
+
                 # pushing from the other edge is a special case where we need to add an 'X' value in the adjacent
                 # coordinates
-                if x == 5:
-                    temp_board[adjacent_coordinates] == 'X'
-                temp_board[current_coordinates] = temp_board[adjacent_coordinates]
+                if x == coordinates[0] - 1:
+                    temp_board[adjacent_coordinates] = 'X'
 
         if direction == 'R':
             # need to shift the positions of all marbles to the right 1. start at the edge of the board and work
             # backwards through the coordinates.
-            for x in range(coordinates[0] - 1, 0, -1):
+            for x in range(6, coordinates[0] + 1, -1):
                 current_coordinates = (x, coordinates[1])
                 adjacent_coordinates = (x - 1, coordinates[1])
                 temp = temp_board[current_coordinates]
                 # check if temp is anything other than 'X', if it is, we'll be pushing something off the board, so
                 # we need to determine what that object is.
-                if x == 0:
+                if x == 6:
                     if temp == 'R':
                         playername.increase_captured()
 
-                # pushing from the other edge is a special case where we need to add an 'X' value in the adjacent
-                # coordinates
-                if x == 5:
-                    temp_board[adjacent_coordinates] == 'X'
                 temp_board[current_coordinates] = temp_board[adjacent_coordinates]
 
+                # pushing from the other edge is a special case where we need to add an 'X' value in the adjacent
+                # coordinates
+                if x == coordinates[0] + 1:
+                    temp_board[adjacent_coordinates] = 'X'
+
+        # execute the move
         if direction == 'F':
             # need to shift the positions of all marbles forward 1. start at the edge of the board and work
             # backwards through the coordinates.
-            for x in range(0, coordinates[0] - 1):
+            for y in range(0, coordinates[1] - 1):
                 # I know the zero does nothing, but it helps illustrate the position within the grid.
-                current_coordinates = (0 + x, coordinates[1])
-                adjacent_coordinates = (0 + 1 + x, coordinates[1])
+                current_coordinates = (coordinates[0], 0 + y)
+                adjacent_coordinates = (coordinates[0], 0 + 1 + y)
                 temp = temp_board[current_coordinates]
                 # check if temp is anything other than 'X', if it is, we'll be pushing something off the board, so
                 # we need to determine what that object is.
-                if x == 0:
+                if y == 0:
                     if temp == 'R':
                         playername.increase_captured()
 
+                temp_board[current_coordinates] = temp_board[adjacent_coordinates]
+
                 # pushing from the other edge is a special case where we need to add an 'X' value in the adjacent
                 # coordinates
-                if x == 5:
-                    temp_board[adjacent_coordinates] == 'X'
-                temp_board[current_coordinates] = temp_board[adjacent_coordinates]
+                if y == coordinates[1] - 1:
+                    temp_board[adjacent_coordinates] = 'X'
 
         if direction == 'B':
-            # need to shift the positions of all marbles back 1. start at the edge of the board and work
+            # need to shift the positions of all marbles backwards 1. start at the edge of the board and work
             # backwards through the coordinates.
-            for x in range(0, coordinates[0] - 1):
-                # I know the zero does nothing, but it helps illustrate the position within the grid.
-                current_coordinates = (0 + x, coordinates[1])
-                adjacent_coordinates = (0 + 1 + x, coordinates[1])
+            for y in range(6, coordinates[1] + 1, -1):
+                current_coordinates = (coordinates[0], y)
+                adjacent_coordinates = (coordinates[0], y - 1)
                 temp = temp_board[current_coordinates]
                 # check if temp is anything other than 'X', if it is, we'll be pushing something off the board, so
                 # we need to determine what that object is.
-                if x == 0:
+                if y == 6:
                     if temp == 'R':
                         playername.increase_captured()
 
+                temp_board[current_coordinates] = temp_board[adjacent_coordinates]
+
                 # pushing from the other edge is a special case where we need to add an 'X' value in the adjacent
                 # coordinates
-                if x == 5:
-                    temp_board[adjacent_coordinates] == 'X'
-                temp_board[current_coordinates] = temp_board[adjacent_coordinates]
+                if y == coordinates[1] + 1:
+                    temp_board[adjacent_coordinates] = 'X'
 
         # validate that the move didn't remove one of the current player's marbles.
         previous_count = self.get_marble_count_board(self._priorGameBoard)
@@ -207,7 +204,7 @@ class KubaGame:
 
         # win condition 3 requires a function call to evaluate the temp board for possible moves for the opponent.
         opponent = self.get_opposite_player(playername)
-        if opponent.check_for_valid_moves() is False:
+        if self.check_for_valid_moves(opponent) is False:
             self._priorGameBoard = self._gameBoard
             self._gameBoard = temp_board
             self._winner = playername
@@ -227,13 +224,6 @@ class KubaGame:
         counts the number of marbles that player object possesses.
         :return: the number of captured balls.
         """
-        captured = 0
-        if player == self._player1:
-            captured = player.get_player_captured()
-        elif player == self._player2:
-            captured = player.get_player_captured()
-        return captured
-
         captured = player.get_player_captured()
         return captured
 
@@ -321,7 +311,7 @@ class KubaGame:
         """
         # loop through all keys and directions checking for valid moves. if a single valid move is found, return true.
         for keys in self._gameBoard:
-            if self._gameBoard[keys] == player.get_color(): # checks for valid moves only for the specified player
+            if self._gameBoard[keys] == player.get_color():  # checks for valid moves only for the specified player
                 for directions in ('L', 'R', 'F', 'B'):
                     if self.isvalid(keys, directions):
                         return True
@@ -342,7 +332,6 @@ class Player:
         self._color = player[1]
         self._captured = 0
         self._playerMarbleCount = 8
-
 
     def get_name(self):
         """
@@ -375,7 +364,7 @@ class Player:
         self._captured += 1
         return
 
-#"DETAILED TEXT DESCRIPTIONS OF HOW TO HANDLE THE SCENARIOS (all pseudocode is listed below)"
+# "DETAILED TEXT DESCRIPTIONS OF HOW TO HANDLE THE SCENARIOS (all pseudocode is listed below)"
 # 1. Initialize the board - set up a dictionary where the keys are the coordinates of the board and the values are the
 #    color of the marble or 'X' if there is no marble at that coordinate.
 # 2. Determine how to track which player's move it is. - keep a list of the names of the player objects that have been
@@ -412,17 +401,3 @@ class Player:
 #    d. If a win did not occur, catalogue the move that was completed, calculate the opposite move, store it in a data
 #       member, update the turn to the opposite player name.
 # 3. Wait for more input.
-
-
-# game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
-# val1 = game.get_marble_count() #returns (8,8,13)
-# print(val1)
-# val1ish = game.get_marble((0, 0))
-# print(val1ish)
-# val2 = game.get_captured('PlayerA') #returns 0
-# print(val2)
-# val3 = game.get_current_turn() #returns 'PlayerB' because PlayerA has just played.
-# val4 = game.get_winner() #returns None
-# game.make_move('PlayerA', (6,5), 'F')
-# game.make_move('PlayerA', (6,5), 'L') #Cannot make this move
-# game.get_marble((5,5)) #returns 'W'

@@ -451,19 +451,19 @@ class Player:
 # 3. Wait for more input.
 
 #
-game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
-val1 = game.get_marble_count() #returns (8,8,13)
-print(val1)
-val1ish = game.get_marble((0, 0))
-print(val1ish)
-val2 = game.get_captured('PlayerA') #returns 0
-print(val2)
-val3 = game.get_current_turn() #returns 'PlayerB' because PlayerA has just played.
-val4 = game.get_winner() #returns None
-result = game.make_move('PlayerA', (6, 5), 'F')
-print(result)
-#game.print_board(game._gameBoard)
-result2 = game.make_move('PlayerA', (6, 5), 'L') #Cannot make this move
-print(result2)
-result3 = game.get_marble((5, 5)) #returns 'W'
-print(result3)
+# game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
+# val1 = game.get_marble_count() #returns (8,8,13)
+# print(val1)
+# val1ish = game.get_marble((0, 0))
+# print(val1ish)
+# val2 = game.get_captured('PlayerA') #returns 0
+# print(val2)
+# val3 = game.get_current_turn() #returns 'PlayerB' because PlayerA has just played.
+# val4 = game.get_winner() #returns None
+# result = game.make_move('PlayerA', (6, 5), 'F')
+# print(result)
+# #game.print_board(game._gameBoard)
+# result2 = game.make_move('PlayerA', (6, 5), 'L') #Cannot make this move
+# print(result2)
+# result3 = game.get_marble((5, 5)) #returns 'W'
+# print(result3)

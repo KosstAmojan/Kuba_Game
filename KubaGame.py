@@ -4,7 +4,6 @@
 # and validates player moves among other things. The Player class handles each of the player objects and keeps track of
 # the number of red marbles and player color marbles in possession by each of the individual players.
 
-
 class KubaGame:
     """
     This class manages the game board for Kuba and tracks the placements and counts of all the marbles across the board.
@@ -32,7 +31,8 @@ class KubaGame:
 
         # my solution to detect if a move undoes the prior move is to keep copies of the prior board and compare a temp
         # board to it in the make move method.
-        self._priorGameBoard = None
+        # learned this the hard way, use dict to pass by value.
+        self._priorGameBoard = dict(self._gameBoard)
 
     def get_current_turn(self):
         """
@@ -65,105 +65,110 @@ class KubaGame:
         :param direction: the direction of the move. Valid directions: L, R, F, B (Left, Right, Forward, Backward)
         :return: True if valid, False otherwise. Also will trigger a win somehow.
         """
-        pass
 
-        temp_board = self._gameBoard
+        temp_board = dict(self._gameBoard)
+        #self.print_board(temp_board)
+        if playername == self._player1.get_name():
+            player = self._player1
+        else:
+            player = self._player2
 
         # check that it's the player's turn.
-        if self._turn != playername:
+        if self._turn != player and self._turn is not None:
             return False
 
         if self.isvalid(coordinates, direction) is False:
             return False
 
-        # execute the move
+        # execute the move -- put the row upon which the move is being made into an array, and then perform the
+        # moves. We will then count the marbles in the result array, see if the number of 'B','W', or 'R' changed
+        # and then insert the result array back in place of the old one.
         if direction == 'L':
-            # need to shift the positions of all marbles to the left 1. start at the edge of the board and work
-            # backwards through the coordinates.
-            for x in range(0, coordinates[0] - 1):
-                # I know the zero does nothing, but it helps illustrate the position within the grid.
-                current_coordinates = (0 + x, coordinates[1])
-                adjacent_coordinates = (0 + 1 + x, coordinates[1])
-                temp = temp_board[current_coordinates]
-                # check if temp is anything other than 'X', if it is, we'll be pushing something off the board, so
-                # we need to determine what that object is.
-                if x == 0:
-                    if temp == 'R':
-                        playername.increase_captured()
+            # get all of the values from the board where the row matches the coordinates for the move. since this is
+            # a left move, create an array from these values starting at y=6.
+            x_val = coordinates[0]
+            array_to_sort = []
+            for i in range(6, -1, -1):
+                array_to_sort.append(temp_board[(x_val, i)])
 
-                temp_board[current_coordinates] = temp_board[adjacent_coordinates]
+            begin_red_count = self.red_marble_count_array(array_to_sort)
+            result_array = self.push_array(array_to_sort, coordinates[1], player.get_color())
+            end_red_count = self.red_marble_count_array(result_array)
 
-                # pushing from the other edge is a special case where we need to add an 'X' value in the adjacent
-                # coordinates
-                if x == coordinates[0] - 1:
-                    temp_board[adjacent_coordinates] = 'X'
+            # see if this array has less reds
+            if begin_red_count - end_red_count > 0:
+                player.increase_captured()
+
+            # now copy the result array into the temp board.
+            for i in range(6, -1, -1):
+                temp_board[(x_val, i)] = result_array[6 - i]
 
         if direction == 'R':
-            # need to shift the positions of all marbles to the right 1. start at the edge of the board and work
-            # backwards through the coordinates.
-            for x in range(6, coordinates[0] + 1, -1):
-                current_coordinates = (x, coordinates[1])
-                adjacent_coordinates = (x - 1, coordinates[1])
-                temp = temp_board[current_coordinates]
-                # check if temp is anything other than 'X', if it is, we'll be pushing something off the board, so
-                # we need to determine what that object is.
-                if x == 6:
-                    if temp == 'R':
-                        playername.increase_captured()
+            # get all of the values from the board where the row matches the coordinates for the move. since this is
+            # a right move, create an array from these values starting at y=0.
+            x_val = coordinates[0]
+            array_to_sort = []
+            for i in range(0, 6):
+                array_to_sort.append(temp_board[(x_val, i)])
 
-                temp_board[current_coordinates] = temp_board[adjacent_coordinates]
+            begin_red_count = self.red_marble_count_array(array_to_sort)
+            result_array = self.push_array(array_to_sort, coordinates[1], player.get_color())
+            end_red_count = self.red_marble_count_array(result_array)
 
-                # pushing from the other edge is a special case where we need to add an 'X' value in the adjacent
-                # coordinates
-                if x == coordinates[0] + 1:
-                    temp_board[adjacent_coordinates] = 'X'
+            # see if this array has less reds
+            if begin_red_count - end_red_count > 0:
+                player.increase_captured()
 
-        # execute the move
+            # now copy the result array into the temp board.
+            for i in range(0, 6):
+                temp_board[(x_val, i)] = result_array[i]
+
         if direction == 'F':
-            # need to shift the positions of all marbles forward 1. start at the edge of the board and work
-            # backwards through the coordinates.
-            for y in range(0, coordinates[1] - 1):
-                # I know the zero does nothing, but it helps illustrate the position within the grid.
-                current_coordinates = (coordinates[0], 0 + y)
-                adjacent_coordinates = (coordinates[0], 0 + 1 + y)
-                temp = temp_board[current_coordinates]
-                # check if temp is anything other than 'X', if it is, we'll be pushing something off the board, so
-                # we need to determine what that object is.
-                if y == 0:
-                    if temp == 'R':
-                        playername.increase_captured()
+            # get all of the values from the board where the row matches the coordinates for the move. since this is
+            # a forward move, create an array from these values starting at x=6.
+            y_val = coordinates[1]
+            array_to_sort = []
+            for i in range(6, -1, -1):
+                array_to_sort.append(temp_board[(i, y_val)])
 
-                temp_board[current_coordinates] = temp_board[adjacent_coordinates]
+            begin_red_count = self.red_marble_count_array(array_to_sort)
+            result_array = self.push_array(array_to_sort, coordinates[0], player.get_color())
+            end_red_count = self.red_marble_count_array(result_array)
 
-                # pushing from the other edge is a special case where we need to add an 'X' value in the adjacent
-                # coordinates
-                if y == coordinates[1] - 1:
-                    temp_board[adjacent_coordinates] = 'X'
+            # see if this array has less reds
+            if begin_red_count - end_red_count > 0:
+                player.increase_captured()
+
+            # now copy the result array into the temp board.
+            for i in range(6, -1, -1):
+                temp_board[(i, y_val)] = result_array[6 - i]
 
         if direction == 'B':
-            # need to shift the positions of all marbles backwards 1. start at the edge of the board and work
-            # backwards through the coordinates.
-            for y in range(6, coordinates[1] + 1, -1):
-                current_coordinates = (coordinates[0], y)
-                adjacent_coordinates = (coordinates[0], y - 1)
-                temp = temp_board[current_coordinates]
-                # check if temp is anything other than 'X', if it is, we'll be pushing something off the board, so
-                # we need to determine what that object is.
-                if y == 6:
-                    if temp == 'R':
-                        playername.increase_captured()
+            # get all of the values from the board where the row matches the coordinates for the move. since this is
+            # a backward move, create an array from these values starting at x = 0.
+            y_val = coordinates[1]
+            array_to_sort = []
+            for i in range(0, 6):
+                array_to_sort.append(temp_board[(i, y_val)])
 
-                temp_board[current_coordinates] = temp_board[adjacent_coordinates]
+            begin_red_count = self.red_marble_count_array(array_to_sort)
+            result_array = self.push_array(array_to_sort, coordinates[0], player.get_color())
+            end_red_count = self.red_marble_count_array(result_array)
 
-                # pushing from the other edge is a special case where we need to add an 'X' value in the adjacent
-                # coordinates
-                if y == coordinates[1] + 1:
-                    temp_board[adjacent_coordinates] = 'X'
+            # see if this array has less reds
+            if begin_red_count - end_red_count > 0:
+                player.increase_captured()
+
+            # now copy the result array into the temp board.
+            for i in range(0, 6):
+                temp_board[(i, y_val)] = result_array[i]
+
+        #self.print_board(temp_board)
 
         # validate that the move didn't remove one of the current player's marbles.
         previous_count = self.get_marble_count_board(self._priorGameBoard)
         temp_count = self.get_marble_count_board(temp_board)
-        current_color = playername.get_color()
+        current_color = player.get_color()
 
         if current_color == 'W':
             if previous_count[0] != temp_count[0]:
@@ -203,7 +208,7 @@ class KubaGame:
                 return True
 
         # win condition 3 requires a function call to evaluate the temp board for possible moves for the opponent.
-        opponent = self.get_opposite_player(playername)
+        opponent = self.get_opposite_player(player)
         if self.check_for_valid_moves(opponent) is False:
             self._priorGameBoard = self._gameBoard
             self._gameBoard = temp_board
@@ -320,6 +325,44 @@ class KubaGame:
                         return True
         return False
 
+    def push_array(self, array, starting_index, color):
+        """
+        This is a helper function that will push the marbles in an array that is provided at the starting index.
+        :param color:
+        :param starting_index:
+        :param array:
+        :return:
+        """
+        result_array = ['X']
+        if starting_index > 0:
+            for index in range(0, starting_index):
+                result_array.append(array[index])
+        for value in range(starting_index, len(array)):
+            if len(result_array) == 7:
+                break
+            if array[value] == 'X' and array[value - 1] == color:
+                continue
+            result_array.append(array[value])
+
+        return result_array
+
+    def red_marble_count_array(self, array):
+        red = 0
+        for value in array:
+            if value == 'R':
+                red += 1
+        return red
+
+    def print_board(self, board):
+        x = 0
+        print("Begin board: ")
+        for value in board:
+            x += 1
+            print(board[value], end='')
+            if x % 7 == 0:
+                print('\n')
+        print("End board.")
+
 
 class Player:
     """
@@ -406,15 +449,16 @@ class Player:
 # 3. Wait for more input.
 
 
-# game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
-# val1 = game.get_marble_count() #returns (8,8,13)
-# print(val1)
-# val1ish = game.get_marble((0, 0))
-# print(val1ish)
-# val2 = game.get_captured('PlayerA') #returns 0
-# print(val2)
-# val3 = game.get_current_turn() #returns 'PlayerB' because PlayerA has just played.
-# val4 = game.get_winner() #returns None
-# game.make_move('PlayerA', (6,5), 'F')
-# game.make_move('PlayerA', (6,5), 'L') #Cannot make this move
-# game.get_marble((5,5)) #returns 'W'
+game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
+val1 = game.get_marble_count() #returns (8,8,13)
+print(val1)
+val1ish = game.get_marble((0, 0))
+print(val1ish)
+val2 = game.get_captured('PlayerA') #returns 0
+print(val2)
+val3 = game.get_current_turn() #returns 'PlayerB' because PlayerA has just played.
+val4 = game.get_winner() #returns None
+result = game.make_move('PlayerA', (6, 5), 'F')
+print(result)
+game.make_move('PlayerA', (6, 5), 'L') #Cannot make this move
+game.get_marble((5, 5)) #returns 'W'

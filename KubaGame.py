@@ -290,32 +290,41 @@ class KubaGame:
         if self._gameBoard[coordinates] != player.get_color():
             return False
 
-        if coordinates[0] not in (0, 6) and coordinates[1] not in (0, 6):
-            # Means there's an internal move that has been made
+        if direction == 'L':
+            # if direction is L and on right side i.e. coordinates = (6, i) for all i, all moves are valid.
+            if coordinates[1] == 6:
+                return True
+            # check if the cell immediately to the right is open.
+            open_coordinates = (coordinates[0], coordinates[1]+1)
+            if self._gameBoard[open_coordinates] != 'X':
+                return False
 
-            if direction == 'L':
-                # check if the cell immediately to the right is open.
-                open_coordinates = (coordinates[0], coordinates[1]+1)
-                if self._gameBoard[open_coordinates] != 'X':
-                    return False
+        elif direction == 'R':
+            # if direction is R and on right side i.e. coordinates = (0, i) for all i, all moves are valid.
+            if coordinates[1] == 0:
+                return True
+            # check if the cell immediately to the left is open.
+            open_coordinates = (coordinates[0], coordinates[1]-1)
+            if self._gameBoard[open_coordinates] != 'X':
+                return False
 
-            elif direction == 'R':
-                # check if the cell immediately to the left is open.
-                open_coordinates = (coordinates[0], coordinates[1]-1)
-                if self._gameBoard[open_coordinates] != 'X':
-                    return False
+        elif direction == 'F':
+            # if direction is F and on bottom side i.e. coordinates = (i, 6) for all i, all moves are valid.
+            if coordinates[0] == 6:
+                return True
+            # check if the cell immediately to the bottom is open.
+            open_coordinates = (coordinates[0]-1, coordinates[1])
+            if self._gameBoard[open_coordinates] != 'X':
+                return False
 
-            elif direction == 'F':
-                # check if the cell immediately to the top is open.
-                open_coordinates = (coordinates[0]+1, coordinates[1])
-                if self._gameBoard[open_coordinates] != 'X':
-                    return False
-
-            elif direction == 'B':
-                # check if the cell immediately to the bottom is open.
-                open_coordinates = (coordinates[0]-1, coordinates[1])
-                if self._gameBoard[open_coordinates] != 'X':
-                    return False
+        elif direction == 'B':
+            # if direction is B and on top side i.e. coordinates = (i, 0) for all i, all moves are valid.
+            if coordinates[0] == 0:
+                return True
+            # check if the cell immediately to the top is open.
+            open_coordinates = (coordinates[0]+1, coordinates[1])
+            if self._gameBoard[open_coordinates] != 'X':
+                return False
 
         return True
 
@@ -463,8 +472,8 @@ class Player:
 # val3 = game.get_current_turn() #returns 'PlayerB' because PlayerA has just played.
 # val4 = game.get_winner() #returns None
 # result = game.make_move('PlayerA', (6, 5), 'F')
-# print(game.get_current_turn())
-# game.print_board(game._gameBoard)
+# #print(game.get_current_turn())
+# #game.print_board(game._gameBoard)
 # result2 = game.make_move('PlayerA', (6, 5), 'L')  # Cannot make this move
 # print(result2)
 # result3 = game.get_marble((5, 5)) #returns 'W'

@@ -19,3 +19,14 @@ def push_array(array, starting_index, color):
 
     return result_array
 
+test_array = ['W','W','X','X','X','B','B']
+res1 = push_array(test_array, 0, 'W')
+print(res1)
+res2 = push_array(res1, 0, 'W')
+print(res2)
+res3 = push_array(res2, 0, 'W')
+print(res3)
+res4 = push_array(res3, 0, 'W')
+print(res4)
+res5 = push_array(res4, 0, 'W')
+print(res5)

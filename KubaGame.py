@@ -91,7 +91,7 @@ class KubaGame:
                 array_to_sort.append(temp_board[(row_val, i)])
 
             begin_red_count = self.red_marble_count_array(array_to_sort)
-            result_array = self.push_array(array_to_sort, coordinates[1], player.get_color())
+            result_array = self.push_array(array_to_sort, 6 - coordinates[1], player.get_color())
             end_red_count = self.red_marble_count_array(result_array)
 
             # see if this array has less reds
@@ -107,7 +107,7 @@ class KubaGame:
             # a right move, create an array from these values starting at y=0.
             row_val = coordinates[0]
             array_to_sort = []
-            for i in range(0, 6):
+            for i in range(0, 7):
                 array_to_sort.append(temp_board[(row_val, i)])
 
             begin_red_count = self.red_marble_count_array(array_to_sort)
@@ -119,7 +119,7 @@ class KubaGame:
                 player.increase_captured()
 
             # now copy the result array into the temp board.
-            for i in range(0, 6):
+            for i in range(0, 7):
                 temp_board[(row_val, i)] = result_array[i]
 
         if direction == 'F':
@@ -131,7 +131,7 @@ class KubaGame:
                 array_to_sort.append(temp_board[(i, column_val)])
 
             begin_red_count = self.red_marble_count_array(array_to_sort)
-            result_array = self.push_array(array_to_sort, coordinates[0], player.get_color())
+            result_array = self.push_array(array_to_sort, 6 - coordinates[0], player.get_color())
             end_red_count = self.red_marble_count_array(result_array)
 
             # see if this array has less reds
@@ -147,7 +147,7 @@ class KubaGame:
             # a backward move, create an array from these values starting at x = 0.
             column_val = coordinates[1]
             array_to_sort = []
-            for i in range(0, 6):
+            for i in range(0, 7):
                 array_to_sort.append(temp_board[(i, column_val)])
 
             begin_red_count = self.red_marble_count_array(array_to_sort)
@@ -159,7 +159,7 @@ class KubaGame:
                 player.increase_captured()
 
             # now copy the result array into the temp board.
-            for i in range(0, 6):
+            for i in range(0, 7):
                 temp_board[(i, column_val)] = result_array[i]
 
         #self.print_board(temp_board)
@@ -313,7 +313,7 @@ class KubaGame:
             if coordinates[0] == 6:
                 return True
             # check if the cell immediately to the bottom is open.
-            open_coordinates = (coordinates[0]-1, coordinates[1])
+            open_coordinates = (coordinates[0]+1, coordinates[1])
             if self._gameBoard[open_coordinates] != 'X':
                 return False
 
@@ -322,7 +322,7 @@ class KubaGame:
             if coordinates[0] == 0:
                 return True
             # check if the cell immediately to the top is open.
-            open_coordinates = (coordinates[0]+1, coordinates[1])
+            open_coordinates = (coordinates[0]-1, coordinates[1])
             if self._gameBoard[open_coordinates] != 'X':
                 return False
 
@@ -479,6 +479,7 @@ if __name__ == '__main__':
     ### Construct a sequence of moves to push a 'B' marble off the board and then get the count of red marbles.
     print(game.make_move('PlayerA', (6, 6), 'F'))
     print(game.make_move('PlayerB', (6, 0), 'F'))
+    print(game.get_current_turn())
     print(game.make_move('PlayerA', (5, 6), 'F'))
     print(game.make_move('PlayerB', (5, 0), 'F'))
     print(game.make_move('PlayerA', (4, 6), 'F'))

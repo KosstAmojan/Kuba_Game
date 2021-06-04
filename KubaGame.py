@@ -79,19 +79,19 @@ class KubaGame:
         if self.isvalid(coordinates, direction, player) is False:
             return False
 
-        # execute the move -- put the row upon which the move is being made into an array, and then perform the
+        # execute the move -- put the row or column upon which the move is being made into an array, and  perform the
         # moves. We will then count the marbles in the result array, see if the number of 'B','W', or 'R' changed
         # and then insert the result array back in place of the old one.
         if direction == 'L':
             # get all of the values from the board where the row matches the coordinates for the move. since this is
             # a left move, create an array from these values starting at y=6.
-            x_val = coordinates[1]
+            row_val = coordinates[0]
             array_to_sort = []
             for i in range(6, -1, -1):
-                array_to_sort.append(temp_board[(i, x_val)])
+                array_to_sort.append(temp_board[(row_val, i)])
 
             begin_red_count = self.red_marble_count_array(array_to_sort)
-            result_array = self.push_array(array_to_sort, coordinates[0], player.get_color())
+            result_array = self.push_array(array_to_sort, coordinates[1], player.get_color())
             end_red_count = self.red_marble_count_array(result_array)
 
             # see if this array has less reds
@@ -100,15 +100,55 @@ class KubaGame:
 
             # now copy the result array into the temp board.
             for i in range(6, -1, -1):
-                temp_board[(i, x_val)] = result_array[6 - i]
+                temp_board[(row_val, i)] = result_array[6 - i]
 
         if direction == 'R':
             # get all of the values from the board where the row matches the coordinates for the move. since this is
             # a right move, create an array from these values starting at y=0.
-            x_val = coordinates[1]
+            row_val = coordinates[0]
             array_to_sort = []
             for i in range(0, 6):
-                array_to_sort.append(temp_board[(i, x_val)])
+                array_to_sort.append(temp_board[(row_val, i)])
+
+            begin_red_count = self.red_marble_count_array(array_to_sort)
+            result_array = self.push_array(array_to_sort, coordinates[1], player.get_color())
+            end_red_count = self.red_marble_count_array(result_array)
+
+            # see if this array has less reds
+            if begin_red_count - end_red_count > 0:
+                player.increase_captured()
+
+            # now copy the result array into the temp board.
+            for i in range(0, 6):
+                temp_board[(row_val, i)] = result_array[i]
+
+        if direction == 'F':
+            # get all of the values from the board where the row matches the coordinates for the move. since this is
+            # a forward move, create an array from these values starting at x=6.
+            column_val = coordinates[1]
+            array_to_sort = []
+            for i in range(6, -1, -1):
+                array_to_sort.append(temp_board[(i, column_val)])
+
+            begin_red_count = self.red_marble_count_array(array_to_sort)
+            result_array = self.push_array(array_to_sort, coordinates[0], player.get_color())
+            end_red_count = self.red_marble_count_array(result_array)
+
+            # see if this array has less reds
+            if begin_red_count - end_red_count > 0:
+                player.increase_captured()
+
+            # now copy the result array into the temp board.
+            for i in range(6, -1, -1):
+                temp_board[(i, column_val)] = result_array[6 - i]
+
+        if direction == 'B':
+            # get all of the values from the board where the row matches the coordinates for the move. since this is
+            # a backward move, create an array from these values starting at x = 0.
+            column_val = coordinates[1]
+            array_to_sort = []
+            for i in range(0, 6):
+                array_to_sort.append(temp_board[(i, column_val)])
 
             begin_red_count = self.red_marble_count_array(array_to_sort)
             result_array = self.push_array(array_to_sort, coordinates[0], player.get_color())
@@ -120,47 +160,7 @@ class KubaGame:
 
             # now copy the result array into the temp board.
             for i in range(0, 6):
-                temp_board[(i, x_val)] = result_array[i]
-
-        if direction == 'F':
-            # get all of the values from the board where the row matches the coordinates for the move. since this is
-            # a forward move, create an array from these values starting at x=6.
-            y_val = coordinates[0]
-            array_to_sort = []
-            for i in range(6, -1, -1):
-                array_to_sort.append(temp_board[(y_val, i)])
-
-            begin_red_count = self.red_marble_count_array(array_to_sort)
-            result_array = self.push_array(array_to_sort, coordinates[1], player.get_color())
-            end_red_count = self.red_marble_count_array(result_array)
-
-            # see if this array has less reds
-            if begin_red_count - end_red_count > 0:
-                player.increase_captured()
-
-            # now copy the result array into the temp board.
-            for i in range(6, -1, -1):
-                temp_board[(y_val, i)] = result_array[6 - i]
-
-        if direction == 'B':
-            # get all of the values from the board where the row matches the coordinates for the move. since this is
-            # a backward move, create an array from these values starting at x = 0.
-            y_val = coordinates[0]
-            array_to_sort = []
-            for i in range(0, 6):
-                array_to_sort.append(temp_board[(y_val, i)])
-
-            begin_red_count = self.red_marble_count_array(array_to_sort)
-            result_array = self.push_array(array_to_sort, coordinates[1], player.get_color())
-            end_red_count = self.red_marble_count_array(result_array)
-
-            # see if this array has less reds
-            if begin_red_count - end_red_count > 0:
-                player.increase_captured()
-
-            # now copy the result array into the temp board.
-            for i in range(0, 6):
-                temp_board[(y_val, i)] = result_array[i]
+                temp_board[(i, column_val)] = result_array[i]
 
         #self.print_board(temp_board)
 
@@ -375,6 +375,7 @@ class KubaGame:
         for value in board:
             x += 1
             print(board[value], end='')
+            print(" ", end = '')
             if x % 7 == 0:
                 print('\n')
         print("End board.")
@@ -464,17 +465,29 @@ class Player:
 #       member, update the turn to the opposite player name.
 # 3. Wait for more input.
 
-
-# game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
-# val1 = game.get_marble_count() #returns (8,8,13)
-# val1ish = game.get_marble((0, 0))
-# val2 = game.get_captured('PlayerA') #returns 0
-# val3 = game.get_current_turn() #returns 'PlayerB' because PlayerA has just played.
-# val4 = game.get_winner() #returns None
-# result = game.make_move('PlayerA', (6, 5), 'F')
-# #print(game.get_current_turn())
-# #game.print_board(game._gameBoard)
-# result2 = game.make_move('PlayerA', (6, 5), 'L')  # Cannot make this move
-# print(result2)
-# result3 = game.get_marble((5, 5)) #returns 'W'
-# print(result3)
+if __name__ == '__main__':
+    game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
+    val1 = game.get_marble_count() #returns (8,8,13)
+    val1ish = game.get_marble((0, 0))
+    val2 = game.get_captured('PlayerA') #returns 0
+    val3 = game.get_current_turn() #returns 'PlayerB' because PlayerA has just played.
+    val4 = game.get_winner() #returns None
+    #result = game.make_move('PlayerA', (6, 5), 'F')
+    #print(game.get_current_turn())
+    #game.print_board(game._gameBoard)
+    #result2 = game.make_move('PlayerA', (6, 5), 'L')  # Cannot make this move
+    ### Construct a sequence of moves to push a 'B' marble off the board and then get the count of red marbles.
+    print(game.make_move('PlayerA', (6, 6), 'F'))
+    print(game.make_move('PlayerB', (6, 0), 'F'))
+    print(game.make_move('PlayerA', (5, 6), 'F'))
+    print(game.make_move('PlayerB', (5, 0), 'F'))
+    print(game.make_move('PlayerA', (4, 6), 'F'))
+    print(game.make_move('PlayerB', (4, 0), 'F'))
+    print(game.make_move('PlayerA', (3, 6), 'F'))
+    print(game.make_move('PlayerB', (3, 0), 'F'))
+    print(game.make_move('PlayerA', (2, 6), 'F'))
+    print(game.make_move('PlayerB', (2, 0), 'F'))
+    game.print_board(game._gameBoard)
+    #print(result2)
+    result3 = game.get_marble((5, 5)) #returns 'W'
+    #print(result3)

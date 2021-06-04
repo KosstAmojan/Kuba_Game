@@ -77,7 +77,7 @@ class KubaGame:
         if self._turn != player and self._turn is not None:
             return False
 
-        if self.isvalid(coordinates, direction) is False:
+        if self.isvalid(coordinates, direction, player) is False:
             return False
 
         # execute the move -- put the row upon which the move is being made into an array, and then perform the
@@ -276,7 +276,7 @@ class KubaGame:
                 red += 1
         return (white, black, red)
 
-    def isvalid(self, coordinates, direction):
+    def isvalid(self, coordinates, direction, player):
         """
         Checks if a particular move is valid, given coordinates and a direction.
         :return: True if valid, False otherwise.
@@ -287,6 +287,10 @@ class KubaGame:
         # edge
         if self._gameBoard[coordinates] == 'X':
             return False
+
+        if self._gameBoard[coordinates] != player.get_color():
+            return False
+
         if coordinates[0] not in (0, 6) and coordinates[1] not in (0, 6):
             # Means there's an internal move that has been made
 

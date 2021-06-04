@@ -53,7 +53,7 @@ class KubaGame:
         """
         if player == self._player1:
             return self._player2
-        else:
+        elif player == self._player2:
             return self._player1
 
     def make_move(self, playername, coordinates, direction):
@@ -74,7 +74,7 @@ class KubaGame:
             player = self._player2
 
         # check that it's the player's turn.
-        if self._turn != player and self._turn is not None:
+        if self._turn != playername and self._turn is not None:
             return False
 
         if self.isvalid(coordinates, direction, player) is False:
@@ -186,41 +186,41 @@ class KubaGame:
         # of the opposing player's stones. a player loses if they have no more valid moves.
 
         # win condition 1
-        if temp_count[2] >= 7:
-            self._priorGameBoard = self._gameBoard
-            self._gameBoard = temp_board
+        if player.get_player_captured() >= 7:
+            self._priorGameBoard = dict(self._gameBoard)
+            self._gameBoard = dict(temp_board)
             self._winner = playername
             return True
 
         # win condition 2
         if current_color == 'W':
             if temp_count[1] == 0:
-                self._priorGameBoard = self._gameBoard
-                self._gameBoard = temp_board
+                self._priorGameBoard = dict(self._gameBoard)
+                self._gameBoard = dict(temp_board)
                 self._winner = playername
                 return True
 
         if current_color == 'B':
             if temp_count[0] == 0:
-                self._priorGameBoard = self._gameBoard
-                self._gameBoard = temp_board
+                self._priorGameBoard = dict(self._gameBoard)
+                self._gameBoard = dict(temp_board)
                 self._winner = playername
                 return True
 
         # win condition 3 requires a function call to evaluate the temp board for possible moves for the opponent.
         opponent = self.get_opposite_player(player)
         if self.check_for_valid_moves(opponent) is False:
-            self._priorGameBoard = self._gameBoard
-            self._gameBoard = temp_board
+            self._priorGameBoard = dict(self._gameBoard)
+            self._gameBoard = dict(temp_board)
             self._winner = playername
             return True
 
         # at the end, replace the prior board with the existing game board, and update the game board to the temp board.
-        self._priorGameBoard = self._gameBoard
-        self._gameBoard = temp_board
+        self._priorGameBoard = dict(self._gameBoard)
+        self._gameBoard = dict(temp_board)
 
         # set the opposite player's turn here.
-        self._turn = opponent
+        self._turn = opponent.get_name()
         return True
 
     def get_captured(self, playername):
@@ -318,6 +318,8 @@ class KubaGame:
                 if self._gameBoard[open_coordinates] != 'X':
                     return False
 
+        return True
+
     def check_for_valid_moves(self, player):
         """
         Will evaluate the board to see if the supplied player object has any valid moves left.
@@ -327,7 +329,7 @@ class KubaGame:
         for keys in self._gameBoard:
             if self._gameBoard[keys] == player.get_color():  # checks for valid moves only for the specified player
                 for directions in ('L', 'R', 'F', 'B'):
-                    if self.isvalid(keys, directions):
+                    if self.isvalid(keys, directions, player) is True:
                         return True
         return False
 
@@ -454,7 +456,7 @@ class Player:
 #       member, update the turn to the opposite player name.
 # 3. Wait for more input.
 
-#
+
 # game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
 # val1 = game.get_marble_count() #returns (8,8,13)
 # print(val1)
@@ -463,10 +465,12 @@ class Player:
 # val2 = game.get_captured('PlayerA') #returns 0
 # print(val2)
 # val3 = game.get_current_turn() #returns 'PlayerB' because PlayerA has just played.
+# print(val3)
 # val4 = game.get_winner() #returns None
 # result = game.make_move('PlayerA', (6, 5), 'F')
+# print(game.get_current_turn())
 # print(result)
-# #game.print_board(game._gameBoard)
+# game.print_board(game._gameBoard)
 # result2 = game.make_move('PlayerA', (6, 5), 'L') #Cannot make this move
 # print(result2)
 # result3 = game.get_marble((5, 5)) #returns 'W'

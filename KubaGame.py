@@ -20,13 +20,13 @@ class KubaGame:
         self._winner = None
 
         self._gameBoard = {
-            (0, 0): 'W', (1, 0): 'W', (2, 0): 'X', (3, 0): 'X', (4, 0): 'X', (5, 0): 'B', (6, 0): 'B',
-            (0, 1): 'W', (1, 1): 'W', (2, 1): 'X', (3, 1): 'R', (4, 1): 'X', (5, 1): 'B', (6, 1): 'B',
-            (0, 2): 'X', (1, 2): 'X', (2, 2): 'R', (3, 2): 'R', (4, 2): 'R', (5, 2): 'X', (6, 2): 'X',
-            (0, 3): 'X', (1, 3): 'R', (2, 3): 'R', (3, 3): 'R', (4, 3): 'R', (5, 3): 'R', (6, 3): 'X',
-            (0, 4): 'X', (1, 4): 'X', (2, 4): 'R', (3, 4): 'R', (4, 4): 'R', (5, 4): 'X', (6, 4): 'X',
-            (0, 5): 'B', (1, 5): 'B', (2, 5): 'X', (3, 5): 'R', (4, 5): 'X', (5, 5): 'W', (6, 5): 'W',
-            (0, 6): 'B', (1, 6): 'B', (2, 6): 'X', (3, 6): 'X', (4, 6): 'X', (5, 6): 'W', (6, 6): 'W',
+            (0, 0): 'W', (0, 1): 'W', (0, 2): 'X', (0, 3): 'X', (0, 4): 'X', (0, 5): 'B', (0, 6): 'B',
+            (1, 0): 'W', (1, 1): 'W', (1, 2): 'X', (1, 3): 'R', (1, 4): 'X', (1, 5): 'B', (1, 6): 'B',
+            (2, 0): 'X', (2, 1): 'X', (2, 2): 'R', (2, 3): 'R', (2, 4): 'R', (2, 5): 'X', (2, 6): 'X',
+            (3, 0): 'X', (3, 1): 'R', (3, 2): 'R', (3, 3): 'R', (3, 4): 'R', (3, 5): 'R', (3, 6): 'X',
+            (4, 0): 'X', (4, 1): 'X', (4, 2): 'R', (4, 3): 'R', (4, 4): 'R', (4, 5): 'X', (4, 6): 'X',
+            (5, 0): 'B', (5, 1): 'B', (5, 2): 'X', (5, 3): 'R', (5, 4): 'X', (5, 5): 'W', (5, 6): 'W',
+            (6, 0): 'B', (6, 1): 'B', (6, 2): 'X', (6, 3): 'X', (6, 4): 'X', (6, 5): 'W', (6, 6): 'W',
         }
 
         # my solution to detect if a move undoes the prior move is to keep copies of the prior board and compare a temp
@@ -67,7 +67,6 @@ class KubaGame:
         """
 
         temp_board = dict(self._gameBoard)
-        #self.print_board(temp_board)
         if playername == self._player1.get_name():
             player = self._player1
         else:
@@ -86,13 +85,13 @@ class KubaGame:
         if direction == 'L':
             # get all of the values from the board where the row matches the coordinates for the move. since this is
             # a left move, create an array from these values starting at y=6.
-            x_val = coordinates[0]
+            x_val = coordinates[1]
             array_to_sort = []
             for i in range(6, -1, -1):
-                array_to_sort.append(temp_board[(x_val, i)])
+                array_to_sort.append(temp_board[(i, x_val)])
 
             begin_red_count = self.red_marble_count_array(array_to_sort)
-            result_array = self.push_array(array_to_sort, coordinates[1], player.get_color())
+            result_array = self.push_array(array_to_sort, coordinates[0], player.get_color())
             end_red_count = self.red_marble_count_array(result_array)
 
             # see if this array has less reds
@@ -101,15 +100,55 @@ class KubaGame:
 
             # now copy the result array into the temp board.
             for i in range(6, -1, -1):
-                temp_board[(x_val, i)] = result_array[6 - i]
+                temp_board[(i, x_val)] = result_array[6 - i]
 
         if direction == 'R':
             # get all of the values from the board where the row matches the coordinates for the move. since this is
             # a right move, create an array from these values starting at y=0.
-            x_val = coordinates[0]
+            x_val = coordinates[1]
             array_to_sort = []
             for i in range(0, 6):
-                array_to_sort.append(temp_board[(x_val, i)])
+                array_to_sort.append(temp_board[(i, x_val)])
+
+            begin_red_count = self.red_marble_count_array(array_to_sort)
+            result_array = self.push_array(array_to_sort, coordinates[0], player.get_color())
+            end_red_count = self.red_marble_count_array(result_array)
+
+            # see if this array has less reds
+            if begin_red_count - end_red_count > 0:
+                player.increase_captured()
+
+            # now copy the result array into the temp board.
+            for i in range(0, 6):
+                temp_board[(i, x_val)] = result_array[i]
+
+        if direction == 'F':
+            # get all of the values from the board where the row matches the coordinates for the move. since this is
+            # a forward move, create an array from these values starting at x=6.
+            y_val = coordinates[0]
+            array_to_sort = []
+            for i in range(6, -1, -1):
+                array_to_sort.append(temp_board[(y_val, i)])
+
+            begin_red_count = self.red_marble_count_array(array_to_sort)
+            result_array = self.push_array(array_to_sort, coordinates[1], player.get_color())
+            end_red_count = self.red_marble_count_array(result_array)
+
+            # see if this array has less reds
+            if begin_red_count - end_red_count > 0:
+                player.increase_captured()
+
+            # now copy the result array into the temp board.
+            for i in range(6, -1, -1):
+                temp_board[(y_val, i)] = result_array[6 - i]
+
+        if direction == 'B':
+            # get all of the values from the board where the row matches the coordinates for the move. since this is
+            # a backward move, create an array from these values starting at x = 0.
+            y_val = coordinates[0]
+            array_to_sort = []
+            for i in range(0, 6):
+                array_to_sort.append(temp_board[(y_val, i)])
 
             begin_red_count = self.red_marble_count_array(array_to_sort)
             result_array = self.push_array(array_to_sort, coordinates[1], player.get_color())
@@ -121,47 +160,7 @@ class KubaGame:
 
             # now copy the result array into the temp board.
             for i in range(0, 6):
-                temp_board[(x_val, i)] = result_array[i]
-
-        if direction == 'F':
-            # get all of the values from the board where the row matches the coordinates for the move. since this is
-            # a forward move, create an array from these values starting at x=6.
-            y_val = coordinates[1]
-            array_to_sort = []
-            for i in range(6, -1, -1):
-                array_to_sort.append(temp_board[(i, y_val)])
-
-            begin_red_count = self.red_marble_count_array(array_to_sort)
-            result_array = self.push_array(array_to_sort, coordinates[0], player.get_color())
-            end_red_count = self.red_marble_count_array(result_array)
-
-            # see if this array has less reds
-            if begin_red_count - end_red_count > 0:
-                player.increase_captured()
-
-            # now copy the result array into the temp board.
-            for i in range(6, -1, -1):
-                temp_board[(i, y_val)] = result_array[6 - i]
-
-        if direction == 'B':
-            # get all of the values from the board where the row matches the coordinates for the move. since this is
-            # a backward move, create an array from these values starting at x = 0.
-            y_val = coordinates[1]
-            array_to_sort = []
-            for i in range(0, 6):
-                array_to_sort.append(temp_board[(i, y_val)])
-
-            begin_red_count = self.red_marble_count_array(array_to_sort)
-            result_array = self.push_array(array_to_sort, coordinates[0], player.get_color())
-            end_red_count = self.red_marble_count_array(result_array)
-
-            # see if this array has less reds
-            if begin_red_count - end_red_count > 0:
-                player.increase_captured()
-
-            # now copy the result array into the temp board.
-            for i in range(0, 6):
-                temp_board[(i, y_val)] = result_array[i]
+                temp_board[(y_val, i)] = result_array[i]
 
         #self.print_board(temp_board)
 
@@ -296,25 +295,25 @@ class KubaGame:
 
             if direction == 'L':
                 # check if the cell immediately to the right is open.
-                open_coordinates = (coordinates[0]+1, coordinates[1])
+                open_coordinates = (coordinates[0], coordinates[1]+1)
                 if self._gameBoard[open_coordinates] != 'X':
                     return False
 
             elif direction == 'R':
                 # check if the cell immediately to the left is open.
-                open_coordinates = (coordinates[0]-1, coordinates[1])
-                if self._gameBoard[open_coordinates] != 'X':
-                    return False
-
-            elif direction == 'F':
-                # check if the cell immediately to the bottom is open.
                 open_coordinates = (coordinates[0], coordinates[1]-1)
                 if self._gameBoard[open_coordinates] != 'X':
                     return False
 
-            elif direction == 'B':
+            elif direction == 'F':
                 # check if the cell immediately to the top is open.
-                open_coordinates = (coordinates[0], coordinates[1]+1)
+                open_coordinates = (coordinates[0]+1, coordinates[1])
+                if self._gameBoard[open_coordinates] != 'X':
+                    return False
+
+            elif direction == 'B':
+                # check if the cell immediately to the bottom is open.
+                open_coordinates = (coordinates[0]-1, coordinates[1])
                 if self._gameBoard[open_coordinates] != 'X':
                     return False
 
@@ -459,19 +458,14 @@ class Player:
 
 # game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
 # val1 = game.get_marble_count() #returns (8,8,13)
-# print(val1)
 # val1ish = game.get_marble((0, 0))
-# print(val1ish)
 # val2 = game.get_captured('PlayerA') #returns 0
-# print(val2)
 # val3 = game.get_current_turn() #returns 'PlayerB' because PlayerA has just played.
-# print(val3)
 # val4 = game.get_winner() #returns None
 # result = game.make_move('PlayerA', (6, 5), 'F')
 # print(game.get_current_turn())
-# print(result)
 # game.print_board(game._gameBoard)
-# result2 = game.make_move('PlayerA', (6, 5), 'L') #Cannot make this move
+# result2 = game.make_move('PlayerA', (6, 5), 'L')  # Cannot make this move
 # print(result2)
 # result3 = game.get_marble((5, 5)) #returns 'W'
 # print(result3)

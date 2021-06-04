@@ -165,7 +165,7 @@ class KubaGame:
         #self.print_board(temp_board)
 
         # validate that the move didn't remove one of the current player's marbles.
-        previous_count = self.get_marble_count_board(self._priorGameBoard)
+        previous_count = self.get_marble_count_board(self._gameBoard)
         temp_count = self.get_marble_count_board(temp_board)
         current_color = player.get_color()
 
@@ -282,8 +282,7 @@ class KubaGame:
         """
         # check if the move is valid -- ie there is a free space on the side opposite the direction being pushed OR the
         # ball is on an edge that is opposite from the direction being pushed
-        # check edges first -- any coordinate having 0 or 6 in the x position or 0 or 6 in the y position is along an
-        # edge
+
         if self._gameBoard[coordinates] == 'X':
             return False
 
@@ -344,10 +343,10 @@ class KubaGame:
     def push_array(self, array, starting_index, color):
         """
         This is a helper function that will push the marbles in an array that is provided at the starting index.
-        :param color:
-        :param starting_index:
-        :param array:
-        :return:
+        :param color: the color of the current player
+        :param starting_index: the index from which the move is to start.
+        :param array: the array that is supplied from reading in either row or column contents in make move.
+        :return: the transformed array.
         """
         result_array = ['X']
         if starting_index > 0:
@@ -363,6 +362,11 @@ class KubaGame:
         return result_array
 
     def red_marble_count_array(self, array):
+        """
+        Method to determine if red marble count changed so player marbles can be adjusted if necessary.
+        :param array: array over which to count
+        :return: the count of red marbles in the array.
+        """
         red = 0
         for value in array:
             if value == 'R':
@@ -375,7 +379,7 @@ class KubaGame:
         for value in board:
             x += 1
             print(board[value], end='')
-            print(" ", end = '')
+            print("  ", end = '')
             if x % 7 == 0:
                 print('\n')
         print("End board.")
@@ -465,6 +469,7 @@ class Player:
 #       member, update the turn to the opposite player name.
 # 3. Wait for more input.
 
+
 if __name__ == '__main__':
     game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
     val1 = game.get_marble_count() #returns (8,8,13)
@@ -477,17 +482,12 @@ if __name__ == '__main__':
     #game.print_board(game._gameBoard)
     #result2 = game.make_move('PlayerA', (6, 5), 'L')  # Cannot make this move
     ### Construct a sequence of moves to push a 'B' marble off the board and then get the count of red marbles.
-    print(game.make_move('PlayerA', (6, 6), 'F'))
-    print(game.make_move('PlayerB', (6, 0), 'F'))
-    print(game.get_current_turn())
-    print(game.make_move('PlayerA', (5, 6), 'F'))
-    print(game.make_move('PlayerB', (5, 0), 'F'))
-    print(game.make_move('PlayerA', (4, 6), 'F'))
-    print(game.make_move('PlayerB', (4, 0), 'F'))
-    print(game.make_move('PlayerA', (3, 6), 'F'))
-    print(game.make_move('PlayerB', (3, 0), 'F'))
-    print(game.make_move('PlayerA', (2, 6), 'F'))
-    print(game.make_move('PlayerB', (2, 0), 'F'))
+    print(game.make_move('PlayerB', (6, 1), 'L'))
+    print(game.make_move('PlayerA', (6, 1), 'L'))
+
+
+
+    print(game.get_winner())
     game.print_board(game._gameBoard)
     #print(result2)
     result3 = game.get_marble((5, 5)) #returns 'W'
